@@ -106,7 +106,7 @@ class GameView(object):
         self.screen.blit(fontobject.render('Weapon: ' + str(tribute.weapon.type), 1, (255, 255, 255)), (650, 315))
         self.screen.blit(fontobject.render('****************GOALS*****************', 1, (255, 255, 255)), (505, 350))
 
-        for i, goal in enumerate(tribute.goals):
+        for i, goal in enumerate(tribute.goals.itervalues()):
             self.screen.blit(fontobject.render(goal.name + ': ' + ('%.2f' % goal.value), 1, (255, 255, 255)), (510 + 140 * (i % 2), 385 + (35 * (i / 2))))
 
         pos = (510, 385 + (35 * ((i + 1) / 2)))

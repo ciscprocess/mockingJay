@@ -52,13 +52,14 @@ class GameEngine(object):
         getweapon = Goal("getweapon", 0)
         ally = Goal("ally", 0)
 
-        goals = [hunger, thirst, goalRest, kill, goalHide, getweapon, ally]
+        goals = {'hunger': hunger, 'thirst': thirst, 'rest': goalRest, 'kill': kill, 'hide': goalHide,
+                 'get_weapon': getweapon, 'ally': ally}
         actions = [move_up, move_down, move_right, move_left, hunt, fight, scavenge, craft, hide, getwater, rest, talkAlly, explore]
 
         #create the goals here
         #not really needed right now
 
-        init_locations = [(x, y) for x in range(15,30) for y in range(15,35)]
+        init_locations = [(x, y) for x in range(15, 30) for y in range(15, 35)]
         districts = ['d' + str(x) for x in range(1, 4)]
 
         for d in districts:
@@ -72,6 +73,7 @@ class GameEngine(object):
             t2 = Tribute(goals, actions, *location, district=d, gender='female')
             me.tributes.append(t2)
             me.tributes_by_district.append((d, t1, t2))
+
         for i in range(len(me.tributes)):
             initTribute = me.create_goals(me.tributes[i])
             me.tributes[i].goals = initTribute
@@ -273,4 +275,5 @@ class GameEngine(object):
         ally = Goal("ally", allyStats)
         fear = Goal("fear", 0)
 
-        return [hunger, thirst, rest, kill, hide, getweapon, ally, fear]
+        return {'hunger': hunger, 'thirst': thirst, 'rest': rest, 'kill': kill, 'hide': hide, 'get_weapon': getweapon,
+                'ally': ally, 'fear': fear}
