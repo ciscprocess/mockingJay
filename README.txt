@@ -1,6 +1,6 @@
 Spring 2014 - GAME AI Final Project
 TEAM:
-Mocking Jay
+Mockingjay
 
 CONTRIBUTORS:
 Whitney Henderson
