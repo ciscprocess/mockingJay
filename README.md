@@ -1,5 +1,10 @@
 # Mockingjay
 
+This project is a fork of a class project that I and some group members, listed below, made for the final assignment of
+Georgia Tech's Game AI course. The purpose of this project is to create an interactive simulation of The Hunger Games,
+a fight to the death of various "tributes" detailed in Suzanne Collins' eponymous novel. One of the hopes of this
+project is to create an AI system that consistently produces interesting and sometimes surprising results. As of now,
+there is a lot to do.
 
 ## Contributors
 - Whitney Henderson
