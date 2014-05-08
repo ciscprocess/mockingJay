@@ -1,140 +1,147 @@
 import tribute
 
-class locationDef(object):
+
+class LocationDefinition(object):
+
     def __init__(self):
-        self.startSpace = False     #True/False
-        self.playerThere = False    #True/False
-        self.tribute = None         #Tribute that is in a space. Null otherwise
-        self.terrain = 0            #0-15 Value for terrain Type
-        self.foodChance = 0         #integer value for probability of food
-        self.waterChance = 0        #integer value for probability of water
-        self.visibility = 0         #integer value for visibility
-        self.shortStickChance = 0   #for crafting: Integer Value probability of stick
-        self.sharpStoneChance = 0   #for crafting: integer value probablity of sharp stone
-        self.featherChance = 0      #for crafting: integer value probablilty of feather
-        self.vineChance = 0         #for crafting: integer value probablity of vine
-        self.speedChange = 0        #integer value movement speed changes
-        self.weaponChance = 0        #inter value for probability of weapon
-        self.longStickChance = 0
-        self.broadStoneChance = 0
-        self.longGrassChance = 0
-        self.reedsChance = 0
-        self.pebblesChance = 0
-        self.thornsChance = 0
+        self.start_space = False     # True/False
+        self.player_there = False   # True/False
+        # Tribute that is in a space. Null otherwise
+        self.tribute = None
+        self.terrain = 0            # 0-15 Value for terrain Type
+        self.food_chance = 0        # integer value for probability of food
+        self.water_chance = 0       # integer value for probability of water
+        self.visibility = 0         # integer value for visibility
+        # for crafting: Integer Value probability of stick
+        self.short_stick_chance = 0
+        # for crafting: integer value probability of sharp stone
+        self.sharp_stone_chance = 0
+        # for crafting: integer value probability of feather
+        self.feather_chance = 0
+        # for crafting: integer value probability of vine
+        self.vine_chance = 0
+        self.speed_change = 0        # integer value movement speed changes
+        self.weapon_chance = 0       # inter value for probability of weapon
+        self.long_stick_chance = 0
+        self.broad_stone_chance = 0
+        self.long_grass_chance = 0
+        self.reeds_chance = 0
+        self.pebbles_chance = 0
+        self.thorns_chance = 0
 
     ########### GETS ##############
 
-    def getStartSpace(self):
-        return self.startSpace
+    def get_start_space(self):
+        return self.start_space
 
-    def getPlayerThere(self):
-        return self.playerThere
+    def get_player_there(self):
+        return self.player_there
 
-    def getTribute(self):
+    def get_tribute(self):
         return self.tribute
 
-    def getTerrain(self):
+    def get_terrain(self):
         return self.terrain
 
-    def getFoodChance(self):
-        return self.foodChance
+    def get_food_chance(self):
+        return self.food_chance
 
-    def getWaterChance(self):
-        return self.waterChance
+    def get_water_chance(self):
+        return self.water_chance
 
-    def getShortStickChance(self):
-        return self.stickChance
+    def get_short_stick_chance(self):
+        return self.stick_chance
 
-    def getVisibility(self):
+    def get_visibility(self):
         return self.visibility
 
-    def getSharpStoneChance(self):
-        return self.sharpStoneChance
+    def get_sharp_stone_chance(self):
+        return self.sharp_stone_chance
 
-    def getFeatherChance(self):
-        return self.featherChance
+    def get_feather_chance(self):
+        return self.feather_chance
 
-    def getVineChance(self):
-        return self.vineChance
+    def get_vine_chance(self):
+        return self.vine_chance
 
-    def getSpeedChange(self):
-        return self.speedChange
+    def get_speed_change(self):
+        return self.speed_change
 
-    def getWeaponChance(self):
-        return self.weaponChance
+    def get_weapon_chance(self):
+        return self.weapon_chance
 
-    def getLongStickChance(self):
-        return self.longStickChance
+    def get_long_stick_chance(self):
+        return self.long_stick_chance
 
-    def getBroadStoneChance(self):
-        return self.broadStoneChance
+    def get_broad_stone_chance(self):
+        return self.broad_stone_chance
 
-    def getLongGrassChance(self):
-        return self.longGrassChance
+    def get_long_grass_chance(self):
+        return self.long_grass_chance
 
-    def getReedsChance(self):
-        return self.reedsChance
+    def get_reeds_chance(self):
+        return self.reeds_chance
 
-    def getPebblesChance(self):
-        return self.pebblesChance
+    def get_pebbles_chance(self):
+        return self.pebbles_chance
 
-    def getThornsChance(self):
-        return self.thornsChance
+    def get_thorns_chance(self):
+        return self.thorns_chance
 
     ########### SETS ##############
-    def setStartSpace(self, input):
-        self.startSpace = input
+    def set_start_space(self, input):
+        self.start_space = input
 
-    def setPlayerThere(self, input):
-        self.playerThere = input
+    def set_player_there(self, input):
+        self.player_there = input
 
-    def setTribute(self, input):
+    def set_tribute(self, input):
         self.tribute = input
 
-    def setTerrain(self, input):
+    def set_terrain(self, input):
         self.terrain = input
 
-    def setFoodChance(self, input):
-        self.foodChance = input
+    def set_food_chance(self, input):
+        self.food_chance = input
 
-    def setWaterChance(self, input):
-        self.waterChance = input
+    def set_water_chance(self, input):
+        self.water_chance = input
 
-    def setShortStickChance(self, input):
-        self.stickChance = input
+    def set_short_stick_chance(self, input):
+        self.stick_chance = input
 
-    def setVisibility(self, input):
+    def set_visibility(self, input):
         self.visibility = input
 
-    def setSharpStoneChance(self, input):
-        self.sharpStoneChance = input
+    def set_sharp_stone_chance(self, input):
+        self.sharp_stone_chance = input
 
-    def setFeatherChance(self, input):
-        self.featherChance = input
+    def set_feather_chance(self, input):
+        self.feather_chance = input
 
-    def setVineChance(self, input):
-        self.vineChance = input
+    def set_vine_chance(self, input):
+        self.vine_chance = input
 
-    def setSpeedChange(self, input):
-        self.speedChange = input
+    def set_speed_change(self, input):
+        self.speed_change = input
 
-    def setWeaponChance(self, input):
-        self.weaponChance = input
+    def set_weapon_chance(self, input):
+        self.weapon_chance = input
 
-    def setLongStickChance(self, input):
-        self.longStickChance = input
+    def set_long_stick_chance(self, input):
+        self.long_stick_chance = input
 
-    def setBroadStoneChance(self, input):
-        self.broadStoneChance = input
+    def set_broad_stone_chance(self, input):
+        self.broad_stone_chance = input
 
-    def setLongGrassChance(self, input):
-        self.longGrassChance = input
+    def set_long_grass_chance(self, input):
+        self.long_grass_chance = input
 
-    def setReedsChance(self, input):
-        self.reedsChance = input
+    def set_reeds_chance(self, input):
+        self.reeds_chance = input
 
-    def setPebblesChance(self, input):
-        self.pebblesChance = input
+    def set_pebbles_chance(self, input):
+        self.pebbles_chance = input
 
-    def setThornsChance(self, input):
-        self.thornsChance = input
+    def set_thorns_chance(self, input):
+        self.thorns_chance = input

@@ -1,5 +1,7 @@
 class Action:
-    def __init__(self, values, effected, duration, index, delta_state, desc=''):
+
+    def __init__(
+            self, values, effected, duration, index, delta_state, desc=''):
         self.values = values
         self.effected = effected
         self.duration = duration
@@ -8,9 +10,10 @@ class Action:
         self.description = desc
 
     def __repr__(self):
-        return '<Action>(' + str(self.index) + ', ' + str(self.delta_state) + ', "' + self.description + '")'
+        return '<Action>(' + str(self.index) + ', ' + \
+            str(self.delta_state) + ', "' + self.description + '")'
 
-    #def getGoalChange(self, curGoal):
+    # def getGoalChange(self, curGoal):
     #    count = 0
     #    ret = 0.0
     #    for eff in self.effected:

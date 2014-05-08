@@ -1,4 +1,5 @@
 class Goal:
+
     def __init__(self, name, value, max_value=9999999999):
         self.name = name
         self.value = value

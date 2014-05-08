@@ -7,7 +7,7 @@ import map
 from action import Action
 from tribute import Tribute
 from goal import Goal
-from mapReader import readMap
+from mapReader import read_map
 from random import randint
 from pygame.locals import *
 import json
@@ -20,7 +20,7 @@ class GameEngine(object):
     is_looping = False
     tributes = []
     PAUSED = False
-    curTrib = None
+    cur_trib = None
     tributes_by_district = []
     map_dims = []
     FIGHT_MESSAGES = False
@@ -40,21 +40,21 @@ class GameEngine(object):
         hide = Action([d['hide']], ["hide"], 1, 8, (0, 0), 'hide')
         getwater = Action([d['get_water']], ["thirst"], 1, 9, (0, 0), 'get_water')
         rest = Action([d['rest']], ["rest"], 1, 10, (0, 0), 'rest')
-        talkAlly = Action([d['talk_ally']], ["ally"], 1, 11, (0, 0), 'talk_ally')
+        talk_ally = Action([d['talk_ally']], ["ally"], 1, 11, (0, 0), 'talk_ally')
         explore = Action(d['explore'], ['hunger', 'thirst', 'kill'], 1, 12, (0, 0), 'explore')
         me.FIGHT_MESSAGES = d['fight_messages']
         #create actions (will be overwritten in a minute)
         hunger = Goal("hunger", 2)
         thirst = Goal("thirst", 2)
-        goalRest = Goal("rest", 0)
+        goal_rest = Goal("rest", 0)
         kill = Goal("kill", 0)
-        goalHide = Goal("hide", 0)
+        goal_hide = Goal("hide", 0)
         getweapon = Goal("getweapon", 0)
         ally = Goal("ally", 0)
 
-        goals = {'hunger': hunger, 'thirst': thirst, 'rest': goalRest, 'kill': kill, 'hide': goalHide,
+        goals = {'hunger': hunger, 'thirst': thirst, 'rest': goal_rest, 'kill': kill, 'hide': goal_hide,
                  'get_weapon': getweapon, 'ally': ally}
-        actions = [move_up, move_down, move_right, move_left, hunt, fight, scavenge, craft, hide, getwater, rest, talkAlly, explore]
+        actions = [move_up, move_down, move_right, move_left, hunt, fight, scavenge, craft, hide, getwater, rest, talk_ally, explore]
 
         #create the goals here
         #not really needed right now
@@ -75,19 +75,19 @@ class GameEngine(object):
             me.tributes_by_district.append((d, t1, t2))
 
         for i in range(len(me.tributes)):
-            initTribute = me.create_goals(me.tributes[i])
-            me.tributes[i].goals = initTribute
+            init_tribute = me.create_goals(me.tributes[i])
+            me.tributes[i].goals = init_tribute
             #me.create_actions(me.tributes[i])
 
-        mapToBeUsed = 'maps/allTerr.jpg'
+        map_to_be_used = 'maps/all_terr.jpg'
         me.dims = (110, 70)
         me.map_dims = (50, 50)
-        me.gameMap = readMap(mapToBeUsed)
+        me.game_map = read_map(map_to_be_used)
         me.view = graphics.GameView(*me.dims)
-        me.map = map.Map(mapToBeUsed)
-        me.state = me.map.seed_game_state(me.tributes)  # game.GameState()
+        me.map = map.Map(map_to_be_used)
+        me.state = me.map.seed_game_state(me.tributes)  # game.game_state()
         me.is_looping = True
-        me.curTrib = me.tributes[0]
+        me.cur_trib = me.tributes[0]
         while me.is_looping and GameEngine.loop():
             pass
 
@@ -102,19 +102,19 @@ class GameEngine(object):
         @return: None
         """
         me = GameEngine
-        buttons = me.view.getButtons()
-        names = me.view.getNames()
+        buttons = me.view.get_buttons()
+        names = me.view.get_names()
         for event in pygame.event.get():
             if event.type == KEYDOWN:
                 if event.key == K_q:
                     me.PAUSED = not me.PAUSED
                 if event.key == K_f:
-                    me.curTrib.goals['hunger'].modify_value(-10)
+                    me.cur_trib.goals['hunger'].modify_value(-10)
                 if event.key == K_d:
-                    me.curTrib.goals['thirst'].modify_value(-10)
+                    me.cur_trib.goals['thirst'].modify_value(-10)
                 if event.key == K_w:
-                    me.curTrib.get_weapon()
-                    me.curTrib.goals['get_weapon'].modify_value(-10)
+                    me.cur_trib.get_weapon()
+                    me.cur_trib.goals['get_weapon'].modify_value(-10)
 
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -125,42 +125,42 @@ class GameEngine(object):
                 y = pos[1] / 10
                 for tribute in me.tributes:
                     if (x,y) == tribute.state:
-                        me.curTrib = tribute
+                        me.cur_trib = tribute
                     else:
-                        namePos = 0
+                        name_pos = 0
                         for button in buttons:
                             if button.collidepoint(pos):
                                 for tribute in me.tributes:
-                                    if tribute.first_name == names[namePos]:
-                                        me.curTrib = tribute
-                            namePos += 1
+                                    if tribute.first_name == names[name_pos]:
+                                        me.cur_trib = tribute
+                            name_pos += 1
 
         if not me.PAUSED:
             for x in range(50):
                 for y in range(50):
-                    me.gameMap[x][y].tribute = None
+                    me.game_map[x][y].tribute = None
 
             for tribute in me.tributes:
-                me.gameMap[tribute.state[0]][tribute.state[1]].tribute = tribute
+                me.game_map[tribute.state[0]][tribute.state[1]].tribute = tribute
 
             for tribute in me.tributes:
-                tribute.act(me.gameMap, me.state)  # finds bestAction and does it.
+                tribute.act(me.game_map, me.state)  # finds best_action and does it.
                 tribute.end_turn()
                 death = tribute.check_dead()
                 if death is not None:
                     print tribute.first_name, " ", tribute.last_name, " death by ", death
                     me.tributes.remove(tribute)
-                    if me.curTrib == tribute and len(me.tributes) > 1:
-                        me.curTrib = random.choice(me.tributes)
+                    if me.cur_trib == tribute and len(me.tributes) > 1:
+                        me.cur_trib = random.choice(me.tributes)
             if len(me.tributes) == 1:
                 me.PAUSED = True;
-            me.view.render(me.state, me.curTrib, me.tributes_by_district, me.tributes, 0)
+            me.view.render(me.state, me.cur_trib, me.tributes_by_district, me.tributes, 0)
             me.state.update()
         else:
             if len(me.tributes) == 1:
-                me.view.render(me.state, me.curTrib, me.tributes_by_district, me.tributes, 1)
+                me.view.render(me.state, me.cur_trib, me.tributes_by_district, me.tributes, 1)
             else:
-                me.view.render(me.state, me.curTrib, me.tributes_by_district, me.tributes, 0)
+                me.view.render(me.state, me.cur_trib, me.tributes_by_district, me.tributes, 0)
         return True
 
     @staticmethod
@@ -191,19 +191,19 @@ class GameEngine(object):
         #5. Movement Stuff (don't mess wid that)
 
         #as long as you hunt, you'll get at least 10 food points, maybe more depending on attributes & individual
-        hungerStats = (tribute.attributes['endurance']/2)+tribute.attributes['hunting_skill']-(tribute.attributes['size']/5)
-        foodEnergy = 10 + randint(0, hungerStats)
-        foodRest = (tribute.attributes['stamina'] - 1)/100
-        hunt = Action([foodEnergy,foodRest], ["hunger","rest"], 1, 4,(0,0),'hunt')
+        hunger_stats = (tribute.attributes['endurance']/2)+tribute.attributes['hunting_skill']-(tribute.attributes['size']/5)
+        food_energy = 10 + randint(0, hunger_stats)
+        food_rest = (tribute.attributes['stamina'] - 1)/100
+        hunt = Action([food_energy,food_rest], ["hunger","rest"], 1, 4,(0,0),'hunt')
 
         #if you fight your "bloodlust" goes down. If you're friendly, killng someone drastically reduces your desire to kill
         #someone else. Unless you have a friendliness of 1
-        killStats = (((1/tribute.attributes['bloodlust'])*3)+(tribute.attributes['friendliness']-1))
+        kill_stats = (((1/tribute.attributes['bloodlust'])*3)+(tribute.attributes['friendliness']-1))
         if(int(tribute.district[1:]) == 1 or int(tribute.district[1:]) == 2 or int(tribute.district[1:])):
-            killStats += 3
+            kill_stats += 3
         else:
-            killStats += 5
-        fight = Action([killStats], ["kill"], 1, 5, (0,0),'fight')
+            kill_stats += 5
+        fight = Action([kill_stats], ["kill"], 1, 5, (0,0),'fight')
 
         #If they find a weapon, they'll get back 15 "find weapon" points, which will generally cover
         #about 150 of wanting a weapon, and not having one. Same w/ crafting
@@ -212,30 +212,30 @@ class GameEngine(object):
 
         #If you're small and good at hiding, you get more points for it
         #You also recover some rest
-        hideStats = ((3/(tribute.attributes['size']+tribute.attributes['strength']))+((tribute.attributes['camouflage_skill']-1)/4))
-        hide = Action([hideStats, 3], ["hide", "rest"], 1, 8, (0,0),'hide')
+        hide_stats = ((3/(tribute.attributes['size']+tribute.attributes['strength']))+((tribute.attributes['camouflage_skill']-1)/4))
+        hide = Action([hide_stats, 3], ["hide", "rest"], 1, 8, (0,0),'hide')
 
         #As long as you drink, you'll get at least 10 drink points. Maybe more depending on attributes & individual
-        thirstStats = (tribute.attributes['endurance'])-(tribute.attributes['size']/5)
-        thirstEnergy = 10 + randint(0, thirstStats)
-        getwater = Action([thirstEnergy], ["thirst"], 1, 9, (0,0),'get_water')
+        thirst_stats = (tribute.attributes['endurance'])-(tribute.attributes['size']/5)
+        thirst_energy = 10 + randint(0, thirst_stats)
+        getwater = Action([thirst_energy], ["thirst"], 1, 9, (0,0),'get_water')
 
         #Resting will automatically recover 10 rest points. Maybe more depending on attributes & individual
-        restStats = (tribute.attributes['stamina'] * 2)
-        restEnergy = 10 + randint(0, restStats)
-        rest = Action([restEnergy], ["rest"], 1, 10, (0,0), 'rest')
+        rest_stats = (tribute.attributes['stamina'] * 2)
+        rest_energy = 10 + randint(0, rest_stats)
+        rest = Action([rest_energy], ["rest"], 1, 10, (0,0), 'rest')
 
         #If you're friendly, talking to buddies recovers a bunch of talking-to-buddy points
         #And the smaller, weaker, and more terrible at fighting you are, the more recovery you get for making a buddy
-        allyStats = (tribute.attributes['friendliness'] + (1/tribute.attributes['size']) + (1/tribute.attributes['strength']) + (0.5/tribute.attributes['fighting_skill']))
-        talkAlly = Action([allyStats], ["ally"], 1, 11, (0,0),'talk_ally')
+        ally_stats = (tribute.attributes['friendliness'] + (1/tribute.attributes['size']) + (1/tribute.attributes['strength']) + (0.5/tribute.attributes['fighting_skill']))
+        talk_ally = Action([ally_stats], ["ally"], 1, 11, (0,0),'talk_ally')
 
         explore = Action([3], ['multiple'], 1, 12, (0, 0), 'explore')
 
-        newActions = [move_up, move_down, move_right, move_left, hunt,
-                      fight, scavenge, craft, hide, getwater, rest, talkAlly, explore]
+        new_actions = [move_up, move_down, move_right, move_left, hunt,
+                      fight, scavenge, craft, hide, getwater, rest, talk_ally, explore]
 
-        tribute.actions = newActions
+        tribute.actions = new_actions
 
         return tribute
 
@@ -249,28 +249,28 @@ class GameEngine(object):
         #Start-of-Game goals based on attributes and individual
         district = int(tribute.district[1:])
         if district == 1 or district == 2 or district == 4:
-            killBase = 5
+            kill_base = 5
         else:
-            killBase = 1
-        killLimit = killBase + ((tribute.attributes['bloodlust']-1)*2) + (11/tribute.attributes['friendliness']) + ((tribute.attributes['size']-1)/2) + ((tribute.attributes['fighting_skill']-1)/2) + ((tribute.attributes['strength']-1)/2)
-        killStats = randint(killBase, killLimit) * 10
+            kill_base = 1
+        kill_limit = kill_base + ((tribute.attributes['bloodlust']-1)*2) + (11/tribute.attributes['friendliness']) + ((tribute.attributes['size']-1)/2) + ((tribute.attributes['fighting_skill']-1)/2) + ((tribute.attributes['strength']-1)/2)
+        kill_stats = randint(kill_base, kill_limit) * 10
 
         if(tribute.attributes['size'] + tribute.attributes['strength']) < 4:
-            hideBase = 10
+            hide_base = 10
         else:
-            hideBase = 0
-        hideLimit = hideBase + (10/tribute.attributes['size']) + (5/tribute.attributes['strength']) + (tribute.attributes['camouflage_skill'] * 2) - tribute.attributes['fighting_skill']
-        hideStats = randint(hideBase, hideLimit)
+            hide_base = 0
+        hide_limit = hide_base + (10/tribute.attributes['size']) + (5/tribute.attributes['strength']) + (tribute.attributes['camouflage_skill'] * 2) - tribute.attributes['fighting_skill']
+        hide_stats = randint(hide_base, hide_limit)
 
 
-        getWeaponStats = ((tribute.attributes['weapon_skill']-1)*2) - (tribute.attributes['crafting_skill']-1)
-        allyStats = tribute.attributes['friendliness'] - tribute.attributes['bloodlust']
+        get_weapon_stats = ((tribute.attributes['weapon_skill']-1)*2) - (tribute.attributes['crafting_skill']-1)
+        ally_stats = tribute.attributes['friendliness'] - tribute.attributes['bloodlust']
 
 
-        kill = Goal("kill", killStats, 100)
-        hide = Goal("hide", hideStats)
-        getweapon = Goal("getweapon", getWeaponStats)
-        ally = Goal("ally", allyStats)
+        kill = Goal("kill", kill_stats, 100)
+        hide = Goal("hide", hide_stats)
+        getweapon = Goal("getweapon", get_weapon_stats)
+        ally = Goal("ally", ally_stats)
         fear = Goal("fear", 0)
 
         return {'hunger': hunger, 'thirst': thirst, 'rest': rest, 'kill': kill, 'hide': hide, 'get_weapon': getweapon,

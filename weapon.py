@@ -1,142 +1,142 @@
 import random
 from weaponInfo import weaponInfo
 
-class weapon:
-    def __init__(self, type):
-        ## All weapons start w/ a base d, and they gain or lose depending on what kind of weapon they're fighting against
-        self.weaponInfo = weaponInfo()
-        self.type = type
-        self.damageCap = 0
-        self.isRanged = False
-        self.range = 1
-        self.damage = self.findDamage()
-        self.selfConstructed = False
-        self.usesLeft = 50
 
-        self.setRanged()
-        self.damageCap = self.weaponInfo.weaponStrength(self.type)
+class Weapon:
+    def __init__(self, self_type):
+        # All weapons start w/ a base d, and
+        # they gain or lose depending on what kind of weapon they're fighting against
+        self.weapon_info = weaponInfo()
+        self.type = self_type
+        self.damage_cap = 0
+        self.is_ranged = False
+        self.range = 1
+        self.damage = self.find_damage()
+        self.self_constructed = False
+        self.uses_left = 50
+
+        self.set_ranged()
+        self.damage_cap = self.weapon_info.weaponStrength(self.type)
 
     def __repr__(self):
         return '<Weapon>(' + str(self.type) + ', ' + str(self.damage) + ')'
 
-    def findDamage(self):
-        return random.randint(1,self.weaponInfo.weaponStrength(self.type))
+    def find_damage(self):
+        return random.randint(1, self.weapon_info.weaponStrength(self.type))
 
-
-    def isInRange(self, distToTarget):
-        inRange = False
-        if(self.isRanged and distToTarget <= 1):
-            inRange = False
-        elif(self.isRanged and (distToTarget > 1) and (distToTarget < self.range)):
-            inRange = True
-        elif((not self.isRanged) and distToTarget > 1):
-            inRange = False
-        elif((not self.isRanged) and distToTarget <= 1):
-            inRange = True
+    def is_in_range(self, dist_to_target):
+        if self.is_ranged and dist_to_target <= 1:
+            in_range = False
+        elif self.is_ranged and (dist_to_target > 1) and (dist_to_target < self.range):
+            in_range = True
+        elif (not self.is_ranged) and dist_to_target > 1:
+            in_range = False
+        elif (not self.is_ranged) and dist_to_target <= 1:
+            in_range = True
         else:
-            inRange = False
+            in_range = False
 
-        return inRange
+        return in_range
 
-    def setRanged(self):
-        if(self.type == 'bow'):
-            self.isRanged = True
-        elif(self.type == 'slingshot'):
-            self.isRanged = True
-        elif(self.type == 'blowgun'):
-            self.isRanged = True
+    def set_ranged(self):
+        if self.type == 'bow':
+            self.is_ranged = True
+        elif self.type == 'slingshot':
+            self.is_ranged = True
+        elif self.type == 'blowgun':
+            self.is_ranged = True
         else:
-            self.isRanged = False
-        self.range = self.weaponInfo.weaponRange(self.type)
+            self.is_ranged = False
+        self.range = self.weapon_info.weaponRange(self.type)
 
-    def getRanged(self):
-        return self.isRanged
+    def get_ranged(self):
+        return self.is_ranged
 
     #First is the weapon that we're looking for the damage for
     #Second it the weapon that it's fighting against
-    def getDamage(self, wepAgainst):
-        against = wepAgainst.type
-        weapon = self.type
+    def get_damage(self, wep_against):
+        against = wep_against.type
+        own_weapon = self.type
         damage = self.damage
 
-        if((not wepAgainst.isRanged) and (not self.isRanged)):
-            if(weapon == 'spear'):
-                if(against == 'none'):
+        if not wep_against.is_ranged and not self.is_ranged:
+            if own_weapon == 'spear':
+                if against == 'none':
                     damage += 4
-                elif(against == 'axe' or against == 'sword' or against == 'dagger'):
+                elif against == 'axe' or against == 'sword' or against == 'dagger':
                     damage += 3
                 else:
                     damage += -1
-            elif(weapon == 'axe'):
-                if(against == 'none'):
+            elif own_weapon == 'axe':
+                if against == 'none':
                     damage += 4
-                elif(against == 'sword' or against == 'dagger' or against == 'mace' or against == 'hammer'):
+                elif against == 'sword' or against == 'dagger' or against == 'mace' or against == 'hammer':
                     damage += 3
                 else:
                     damage += -1
-            elif(weapon == 'sword'):
-                if(against == 'none'):
+            elif own_weapon == 'sword':
+                if against == 'none':
                     damage += 4
-                elif(against == 'dagger' or against == 'mace' or against == 'hammer'):
+                elif against == 'dagger' or against == 'mace' or against == 'hammer':
                     damage += 3
                 else:
                     damage += -1
-            elif(weapon == 'dagger'):
-                if(against == 'none'):
+            elif own_weapon == 'dagger':
+                if against == 'none':
                     damage += 4
-                elif(against == 'mace' or against == 'hammer' or against == 'trident'):
+                elif against == 'mace' or against == 'hammer' or against == 'trident':
                     damage += 3
                 else:
                     damage += -1
-            elif(weapon == 'mace'):
-                if(against == 'none'):
+            elif own_weapon == 'mace':
+                if against == 'none':
                     damage += 4
-                elif(against == 'hammer' or against == 'trident' or against == 'spear'):
+                elif against == 'hammer' or against == 'trident' or against == 'spear':
                     damage += 3
                 else:
                     damage += -1
-            elif(weapon == 'hammer'):
-                if(against == 'none'):
+            elif own_weapon == 'hammer':
+                if against == 'none':
                     damage += 4
-                elif(against == 'trident' or against == 'spear'):
+                elif against == 'trident' or against == 'spear':
                     damage += 3
                 else:
                     damage += -1
-            elif(weapon == 'trident'):
-                if(against == 'none'):
+            elif own_weapon == 'trident':
+                if against == 'none':
                     damage += 4
-                elif(against == 'spear' or against == 'axe' or against == 'sword'):
+                elif against == 'spear' or against == 'axe' or against == 'sword':
                     damage += 3
                 else:
                     damage += -1
             else:
                 damage += 0
 
-        elif(wepAgainst.isRanged and (not self.isRanged)):
+        elif wep_against.is_ranged and not self.is_ranged:
             damage += 4
 
-        elif((not wepAgainst.isRanged) and self.isRanged):
+        elif (not wep_against.is_ranged) and self.is_ranged:
             damage -= 1
 
-        elif(wepAgainst.isRanged and self.isRanged):
-            if(weapon == 'slingshot'):
-                if(against == 'none'):
+        elif wep_against.is_ranged and self.is_ranged:
+            if own_weapon == 'slingshot':
+                if against == 'none':
                     damage += 1
-                elif(against == 'blowgun'):
+                elif against == 'blowgun':
                     damage += 2
                 else:
                     damage += -1
-            elif(weapon == 'blowgun'):
-                if(against == 'none'):
+            elif own_weapon == 'blowgun':
+                if against == 'none':
                     damage += 1
-                elif(against == 'bow'):
+                elif against == 'bow':
                     damage += 2
                 else:
                     damage += -1
-            elif(weapon == 'bow'):
-                if(against == 'none'):
+            elif own_weapon == 'bow':
+                if against == 'none':
                     damage += 1
-                elif(against == 'slingshot'):
+                elif against == 'slingshot':
                     damage += 2
                 else:
                     damage -= 1
@@ -146,4 +146,3 @@ class weapon:
             damage += 0
 
         return damage
-

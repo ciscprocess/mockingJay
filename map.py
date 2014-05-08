@@ -1,4 +1,3 @@
-import mapReader
 import PIL
 import game
 

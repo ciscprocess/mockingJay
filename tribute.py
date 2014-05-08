@@ -5,11 +5,12 @@ import copy
 import sys
 from probability import uniform_variable as u
 from weaponInfo import weaponInfo
-from weapon import weapon
+from weapon import Weapon
 import mapReader
 
 
 class Particle(object):
+
     def __init__(self, state=(0, 0), width=1, height=1):
         self.state = state
         self.width, self.height = width, height
@@ -20,8 +21,8 @@ FIGHT_EMERGENCY_CUTOFF = 80
 
 
 class Tribute(Particle):
-    #Goals = list of goals for tribute
-    ################ ACTIONS
+    # Goals = list of goals for tribute
+    # ACTIONS
     # movement l,r,u,d
     # hunt
     # fight
@@ -33,21 +34,23 @@ class Tribute(Particle):
     # talk
     ID_COUNTER = 0
 
-    def __init__(self, goals, actions, x=0, y=0, district='d12', gender='male', do_not_load=False):
+    def __init__(self, goals, actions, x=0, y=0, district='d12',
+                 gender='male', do_not_load=False):
         Particle.__init__(self, (x, y), 1, 1)
         self.id = Tribute.ID_COUNTER
         Tribute.ID_COUNTER += 1
         self.goals = goals
         self.actions = actions
 
-        # remove the fight action. we don't want them fighting unless someone is in range
+        # remove the fight action. we don't want them fighting unless someone
+        # is in range
         self.fight_action = actions[5]
         self.explore_action = actions[12]
         self.actions = self.actions[:5] + self.actions[6:12]
 
         self.district = district
         self.has_weapon = False
-        self.weapon = weapon('')
+        self.weapon = Weapon('')
         self.has_ally = False
         self.allies = []
         self.craft_pouch = []
@@ -119,7 +122,8 @@ class Tribute(Particle):
 
     def clone(self):
         n_goals = {g: self.goals[g].clone() for g in self.goals}
-        n_actions = self.actions[:5] + [self.fight_action] + self.actions[5:12] + [self.explore_action]
+        n_actions = self.actions[
+            :5] + [self.fight_action] + self.actions[5:12] + [self.explore_action]
         n_district = self.district[:]
         n_gender = self.gender[:]
         n = Tribute(n_goals, n_actions, x=self.state[0], y=self.state[1], district=n_district,
@@ -145,7 +149,8 @@ class Tribute(Particle):
         return n
 
     def __repr__(self):
-        s = '<Tribute>(' + self.last_name + ', ' + self.first_name + ', ' + self.gender + ')'
+        s = '<Tribute>(' + self.last_name + ', ' + \
+            self.first_name + ', ' + self.gender + ')'
         return s
 
     def engage_in_combat(self, t):
@@ -180,14 +185,16 @@ class Tribute(Particle):
         :param tribute: the enemy to surmise about
         :return: the surmised value
         """
-        return 1 + int(tribute.has_weapon) * 5 + int(tribute.attributes['strength']) / 2
+        return 1 + int(tribute.has_weapon) * 5 + \
+            int(tribute.attributes['strength']) / 2
 
     def surmise_escape_turns(self, tribute):
         if self.attributes['speed'] >= tribute.attributes['speed']:
-            turns = sys.maxint
+            turns = sys.maxsize
         else:
             s = tribute.attributes['speed'] - self.attributes['speed']
-            distance = abs(self.state[0] - tribute.state[0]) + abs(self.state[1] - tribute.state[1])
+            distance = abs(
+                self.state[0] - tribute.state[0]) + abs(self.state[1] - tribute.state[1])
             turns = distance / s
 
         return turns
@@ -218,13 +225,14 @@ class Tribute(Particle):
             self.killed_by = self.opponent
             if engine.GameEngine.FIGHT_MESSAGES:
                 print str(self) + ' was killed by ' + str(self.killed_by)
-            self.disengage_in_combat((self.opponent or self.killed_by or self.last_opponent))
+            self.disengage_in_combat(
+                (self.opponent or self.killed_by or self.last_opponent))
 
-    #Need to figure out exactly how far
+    # Need to figure out exactly how far
     #/ how we want to handle depth in this function
-    #it will be very important
+    # it will be very important
     def calc_min_discomfort(self, depth, max_depth, game_map, actions):
-        min_val = sys.maxint
+        min_val = sys.maxsize
 
         if depth == max_depth:
             return self.calc_discomfort()
@@ -232,21 +240,31 @@ class Tribute(Particle):
         for action in actions:
             tribute = self.clone()
             tribute.apply_action(action, game_map)
-            min_val = min(tribute.calc_min_discomfort(depth + 1, max_depth, game_map, actions), min_val)
+            min_val = min(
+                tribute.calc_min_discomfort(
+                    depth + 1,
+                    max_depth,
+                    game_map,
+                    actions),
+                min_val)
 
         return min_val
 
     def decide_fight_move(self):
         if self.goals['fear'].value < random.randrange(105, 150):
-            actions = ['attack_head', 'attack_chest', 'attack_gut', 'attack_legs']
+            actions = [
+                'attack_head',
+                'attack_chest',
+                'attack_gut',
+                'attack_legs']
             return random.choice(actions)
         else:
-            ###print str(self), ' became scared and is trying to flee!'
+            # print str(self), ' became scared and is trying to flee!'
             return 'flee'
 
     def act(self, game_map, game_state):
         if self.fighting_state != FIGHT_STATE['fighting']:
-            best_action = (None, sys.maxint)
+            best_action = (None, sys.maxsize)
             actions = self.actions
 
             self.sighted = self.enemy_in_range(game_state)
@@ -258,7 +276,8 @@ class Tribute(Particle):
 
             if self.goals['hunger'].value > 90 or self.goals['thirst'].value > 50 and self.sighted is None:
                 actions = self.actions + [self.explore_action]
-                self.explore_point = NAVIGATION_POINTS[self.explore_point_index]
+                self.explore_point = NAVIGATION_POINTS[
+                    self.explore_point_index]
             elif self.goals['kill'].value > FIGHT_EMERGENCY_CUTOFF and self.sighted is None:
                 actions = self.actions + [self.explore_action]
                 if self.last_sighted_location:
@@ -309,9 +328,11 @@ class Tribute(Particle):
         # with weapon 1d6 damage + 1d(str/2) + 1
         if self.has_weapon:
             damage = self.weapon.damage + random.randrange(1, (self.attributes['strength'] / 4) + 2) + \
-                random.randint(0, self.attributes['weapon_skill']/2 + 1) + 1
+                random.randint(0, self.attributes['weapon_skill'] / 2 + 1) + 1
         else:  # without, 1d2 damage + 1d(str)
-            damage = random.randrange(1, 3) + random.randrange(1, self.attributes['strength'] + 1)
+            damage = random.randrange(1,
+                                      3) + random.randrange(1,
+                                                            self.attributes['strength'] + 1)
         draw = random.random()
         chance_mult = 1
 
@@ -327,19 +348,26 @@ class Tribute(Particle):
         if action_name == 'attack_head':
             if draw < 0.5 * chance_mult:
                 self.opponent.hurt(damage + 2, 'head')
-                self.goals['fear'].value = max(self.goals['fear'].value - (damage + 2) / 2, 0)
+                self.goals['fear'].value = max(
+                    self.goals['fear'].value - (damage + 2) / 2, 0)
         elif action_name == 'attack_chest':
             if draw < 0.8 * chance_mult:
                 self.opponent.hurt(damage + 1, 'chest')
-                self.goals['fear'].value = max(self.goals['fear'].value - (damage + 1) / 2, 0)
+                self.goals['fear'].value = max(
+                    self.goals['fear'].value - (damage + 1) / 2, 0)
         elif action_name == 'attack_gut':
             if draw < 0.8 * chance_mult:
                 self.opponent.hurt(damage, 'gut')
-                self.goals['fear'].value = max(self.goals['fear'].value - damage / 2, 0)
+                self.goals['fear'].value = max(
+                    self.goals['fear'].value -
+                    damage /
+                    2,
+                    0)
         elif action_name == 'attack_legs':
             if draw < 0.9 * chance_mult:
                 self.opponent.hurt(damage - 1, 'legs')
-                self.goals['fear'].value = max(self.goals['fear'].value - (damage - 1) / 2, 0)
+                self.goals['fear'].value = max(
+                    self.goals['fear'].value - (damage - 1) / 2, 0)
         elif action_name == 'flee':
             self.opponent.disengage_in_combat(self)
             self.goals['kill'].value = 0
@@ -353,21 +381,24 @@ class Tribute(Particle):
         rand = (random.randint(1, 10)) / 10
         loc = game_map[self.state[0]][self.state[1]]
         if 3 >= action.index >= 0:  # moving so don't know what gonna do here
-            loc.setTribute(None)
+            loc.set_tribute(None)
             self.old_state = self.state
-            (game_map[self.state[0]][self.state[1]]).setTribute(None)
+            (game_map[self.state[0]][self.state[1]]).set_tribute(None)
             self.state = ((self.state[0] + action.delta_state[0]) % engine.GameEngine.map_dims[0],
-                         (self.state[1] + action.delta_state[1]) % engine.GameEngine.map_dims[1])
-            game_map[self.state[0]][self.state[1]].setTribute(self)
+                          (self.state[1] + action.delta_state[1]) % engine.GameEngine.map_dims[1])
+            game_map[self.state[0]][self.state[1]].set_tribute(self)
         elif action.index == 4:  # find food
-            food_prob = loc.getFoodChance()
+            food_prob = loc.get_food_chance()
             if rand <= food_prob:
                 self.goals['hunger'].modify_value(-action.values[0] * 3)
         elif action.index == 5:  # fight
             self.sighted.engage_in_combat(self)
-            self.goals['kill'].value = max(self.goals['kill'].value - action.values[0], 0)
+            self.goals['kill'].value = max(
+                self.goals['kill'].value -
+                action.values[0],
+                0)
         elif action.index == 6:  # scavenge
-            wep_prob = loc.getWeaponChance()
+            wep_prob = loc.get_weapon_chance()
             goal = self.goals['get_weapon']
             if wep_prob > 0.9:
                 if rand <= wep_prob:
@@ -387,14 +418,15 @@ class Tribute(Particle):
                 if crafted:
                     self.goals['get_weapon'].value = 0
                 else:
-                    self.goals['get_weapon'].modify_value(-self.attributes['crafting_skill'])
+                    self.goals[
+                        'get_weapon'].modify_value(-self.attributes['crafting_skill'])
         elif action.index == 8:  # hide
             ub = self.attributes['camouflage_skill']
             if random.randrange(0, 11) < ub:
                 self.hidden = True
 
         elif action.index == 9:  # get water
-            water_prob = loc.getWaterChance()
+            water_prob = loc.get_water_chance()
             if rand <= water_prob:
                 self.goals['thirst'].modify_value(-action.values[0])
 
@@ -430,22 +462,34 @@ class Tribute(Particle):
 
             for i, direction in enumerate(directions):
                 if game_map[direction[0]][direction[1]].tribute is None:
-                    evals.append((mapReader.l1_dist(direction, self.explore_point), direction, i))
+                    evals.append(
+                        (mapReader.l1_dist(
+                            direction,
+                            self.explore_point),
+                            direction,
+                            i))
             if len(evals) > 0:
-                direction = min(evals, key=lambda x1: x1[0] + random.random() / 1000)  # rand is for breaking ties
+                direction = min(
+                    evals,
+                    key=lambda x1: x1[0] +
+                    random.random() /
+                    1000)  # rand is for breaking ties
                 if mapReader.l1_dist(self.explore_point, direction[1]) < 3:
                     if self.goals['kill'].value > FIGHT_EMERGENCY_CUTOFF:
                         self.last_sighted_location = (self.explore_point[0] + u(0, 16),
                                                       self.explore_point[1] + u(0, 16))
                     else:
-                        self.explore_point_index = (self.explore_point_index + 1) % len(NAVIGATION_POINTS)
-                        self.explore_point = NAVIGATION_POINTS[self.explore_point_index]
+                        self.explore_point_index = (
+                            self.explore_point_index + 1) % len(NAVIGATION_POINTS)
+                        self.explore_point = NAVIGATION_POINTS[
+                            self.explore_point_index]
 
                 self.state = direction[1]
 
     def end_turn(self):
         if self.fighting_state != FIGHT_STATE['fleeing']:
-            self.goals['kill'].modify_value(((self.attributes['bloodlust'] - 1) / 5.0) + 1)
+            self.goals['kill'].modify_value(
+                ((self.attributes['bloodlust'] - 1) / 5.0) + 1)
         if int(self.district[1:]) == 1 or int(self.district[1:]) or int(self.district[1:]) == 4:
             self.goals['kill'].modify_value(0.1)
             if not self.has_weapon:
@@ -453,16 +497,21 @@ class Tribute(Particle):
         if int(self.district[1:]) == 1 or int(self.district[1:]) or int(self.district[1:]) == 4:
             self.goals['kill'].modify_value(0.25)
             if not self.has_weapon:
-                self.goals['get_weapon'].modify_value((1 / (self.attributes['size'] + self.attributes['strength'])))
+                self.goals['get_weapon'].modify_value(
+                    (1 / (self.attributes['size'] + self.attributes['strength'])))
         if (self.attributes['size'] + self.attributes['strength']) < 4:
             if not self.has_ally and not self.has_weapon:
                 self.goals['ally'].modify_value(0.05)
             if not self.has_ally and not self.has_weapon:
                 self.goals['hide'].modify_value(0.01)
 
-            self.goals['ally'].modify_value(0.05 / (len(self.allies) + 1)**2)
+            self.goals['ally'].modify_value(0.05 / (len(self.allies) + 1) ** 2)
 
-        self.goals['hunger'].modify_value(1.0 / self.attributes['endurance'] + self.attributes['size'] / 5.0)
+        self.goals['hunger'].modify_value(
+            1.0 /
+            self.attributes['endurance'] +
+            self.attributes['size'] /
+            5.0)
 
         self.goals['thirst'].modify_value(1.0 / self.attributes['endurance'])
 
@@ -478,9 +527,9 @@ class Tribute(Particle):
 
         #goal.value = max(goal.value, 0)
 
-    #Action will update the state of the world by calculating
-    #Goal updates and where it is / fuzzy logic of where other tributes are
-    #will update current selfs world.
+    # Action will update the state of the world by calculating
+    # Goal updates and where it is / fuzzy logic of where other tributes are
+    # will update current selfs world.
     def apply_action(self, action, game_map):
         # [hunger, thirst, rest, kill, hide, getweapon, ally, fear]
         loc = game_map[self.state[0]][self.state[1]]
@@ -498,11 +547,15 @@ class Tribute(Particle):
             g = random.choice(self.goals.keys())
             self.goals[g].modify_value(0.5)
         elif action.index == 4:  # hunt
-            food_prob = loc.getFoodChance()
+            food_prob = loc.get_food_chance()
             self.goals['hunger'].modify_value(-food_prob * action.values[0])
         elif action.index == 5:  # kill
             if abs(self.sighted.state[0] - self.state[0]) + abs(self.sighted.state[1] - self.state[1]) <= 2:
-                self.goals['kill'].value = max(self.goals['kill'].value - action.values[0]*10, 0)
+                self.goals['kill'].value = max(
+                    self.goals['kill'].value -
+                    action.values[0] *
+                    10,
+                    0)
 
             if self.surmise_enemy_hit(self.sighted) > self.surmise_enemy_hit(self):
                 self.goals['fear'].modify_value(5)
@@ -514,20 +567,26 @@ class Tribute(Particle):
                 self.goals['fear'].modify_value(-11)
 
         elif action.index == 6:  # scavenge
-            wep_chance = loc.getWeaponChance()
+            wep_chance = loc.get_weapon_chance()
             if wep_chance > 0.9 and not self.has_weapon:
-                self.goals['get_weapon'].modify_value(-wep_chance * action.values[0])
+                self.goals[
+                    'get_weapon'].modify_value(-wep_chance * action.values[0])
             elif not self.has_weapon:
-                self.goals['get_weapon'].modify_value(-self.check_craft_scavenge(game_map))
+                self.goals[
+                    'get_weapon'].modify_value(-self.check_craft_scavenge(game_map))
 
         elif action.index == 7:  # craft
             craft_prob = self.check_craft_weapon()
-            self.goals['get_weapon'].modify_value(-(self.goals['get_weapon'].value * craft_prob))
+            self.goals[
+                'get_weapon'].modify_value(-(self.goals['get_weapon'].value * craft_prob))
 
         elif action.index == 8:  # hide
-            self.goals['fear'].modify_value(-(action.values[0] * (self.attributes['camouflage_skill'] / 10.0)))
+            self.goals['fear'].modify_value(-
+                                            (action.values[0] *
+                                             (self.attributes['camouflage_skill'] /
+                                              10.0)))
         elif action.index == 9:  # get_water
-            water_prob = loc.getWaterChance()
+            water_prob = loc.get_water_chance()
             self.goals['thirst'].modify_value(-water_prob * action.values[0])
         elif action.index == 10:  # rest
             self.goals['rest'].modify_value(-action.values[0])
@@ -542,9 +601,18 @@ class Tribute(Particle):
                (game_map[x][(y - 1) % h].tribute is not None and game_map[x][(y - 1) % h].tribute not in self.allies):
                 self.goals['ally'].modify_value(-action.values[0])
         elif action.index == 12:  # explore
-            self.goals['hunger'].value = max(self.goals['hunger'].value - action.values[0], 0)
-            self.goals['thirst'].value = max(self.goals['thirst'].value - action.values[1], 0)
-            self.goals['kill'].value = max(self.goals['thirst'].value - action.values[2], 0)
+            self.goals['hunger'].value = max(
+                self.goals['hunger'].value -
+                action.values[0],
+                0)
+            self.goals['thirst'].value = max(
+                self.goals['thirst'].value -
+                action.values[1],
+                0)
+            self.goals['kill'].value = max(
+                self.goals['thirst'].value -
+                action.values[2],
+                0)
 
         distance_after = 1
         if self.last_opponent and self.fighting_state == FIGHT_STATE['fleeing']:
@@ -564,15 +632,15 @@ class Tribute(Particle):
     def check_dead(self):
         if self.goals['hunger'].value >= 200:
             self.killed = True
-            return " starvation "
+            return ' starvation '
 
         if self.goals['thirst'].value >= 200:
             self.killed = True
-            return " terminal dehydration "
+            return ' terminal dehydration '
 
         if self.goals['rest'].value >= 250:
             self.killed = True
-            return " exhaustion "
+            return ' exhaustion '
 
         if self.killed:
             return self.killed_by
@@ -582,7 +650,7 @@ class Tribute(Particle):
     def get_weapon(self):
         self.has_weapon = True
         weapon_type = random.randint(1, 10)
-        self.weapon = weapon(self.weapon_info.weaponType(weapon_type))
+        self.weapon = Weapon(self.weapon_info.weaponType(weapon_type))
         print str(self), ' has picked up a ', str(self.weapon)
 
     def check_craft_scavenge(self, game_map):
@@ -604,9 +672,13 @@ class Tribute(Particle):
                     mock_pouch.append(craft_type)
                     for current_weapon in self.weapon_info.weaponList:
                         poss_points = 0
-                        can_craft = self.weapon_info.canCraft(current_weapon, mock_pouch)
+                        can_craft = self.weapon_info.canCraft(
+                            current_weapon,
+                            mock_pouch)
                         if can_craft:
-                            poss_points += 5 + self.weapon_info.weaponStrength(current_weapon) / 2
+                            poss_points += 5 + \
+                                self.weapon_info.weaponStrength(
+                                    current_weapon) / 2
                             if poss_points > self.best_scavenge_points:
                                 self.best_scavenge_points = poss_points
                                 self.best_scavenge_choice = craft_type
@@ -614,9 +686,11 @@ class Tribute(Particle):
                                 return best_possible_points
                         else:
                             num_items_need_to_craft = \
-                                len(self.weapon_info.itemsNeededToCraft(current_weapon, mock_pouch))
+                                len(self.weapon_info.itemsNeededToCraft(
+                                    current_weapon, mock_pouch))
                             poss_points += 5 - num_items_need_to_craft + \
-                                (self.weapon_info.weaponStrength(current_weapon)/10) + poss
+                                (self.weapon_info.weaponStrength(
+                                    current_weapon) / 10) + poss
 
                             if poss_points > self.best_scavenge_points:
                                 self.best_scavenge_points = poss_points
@@ -639,25 +713,25 @@ class Tribute(Particle):
     @staticmethod
     def ret_scav_type_prob(resource_type, loc):
         if resource_type == 'shortStick':
-            current_type_prob = loc.shortStickChance
+            current_type_prob = loc.short_stick_chance
         elif resource_type == 'sharpStone':
-            current_type_prob = loc.sharpStoneChance
+            current_type_prob = loc.sharp_stone_chance
         elif resource_type == 'feather':
-            current_type_prob = loc.featherChance
+            current_type_prob = loc.feather_chance
         elif resource_type == 'vine':
-            current_type_prob = loc.vineChance
+            current_type_prob = loc.vine_chance
         elif resource_type == 'longStick':
-            current_type_prob = loc.longStickChance
+            current_type_prob = loc.long_stick_chance
         elif resource_type == 'broadStone':
-            current_type_prob = loc.broadStoneChance
+            current_type_prob = loc.broad_stone_chance
         elif resource_type == 'longGrass':
-            current_type_prob = loc.longGrassChance
+            current_type_prob = loc.long_grass_chance
         elif resource_type == 'reeds':
-            current_type_prob = loc.reedsChance
+            current_type_prob = loc.reeds_chance
         elif resource_type == 'pebbles':
-            current_type_prob = loc.pebblesChance
+            current_type_prob = loc.pebbles_chance
         elif resource_type == 'thorns':
-            current_type_prob = loc.thornsChance
+            current_type_prob = loc.thorns_chance
         else:
             current_type_prob = 0
 
@@ -679,12 +753,14 @@ class Tribute(Particle):
                 strength = self.weapon_info.weaponStrength(wepType)
                 if strength > max_wep_strength:
                     max_wep_strength = strength
-                    num_items_craft_wep = self.weapon_info.totalNumItemsToCraft(wepType)
+                    num_items_craft_wep = self.weapon_info.totalNumItemsToCraft(
+                        wepType)
                     craftable_weapon = wepType
                 elif strength == max_wep_strength:
                     if self.weapon_info.totalNumItemsToCraft(wepType) < num_items_craft_wep:
                         max_wep_strength = strength
-                        num_items_craft_wep = self.weapon_info.totalNumItemsToCraft(wepType)
+                        num_items_craft_wep = self.weapon_info.totalNumItemsToCraft(
+                            wepType)
                         craftable_weapon = wepType
                 else:
                     craftable_weapon = self.wep_can_craft
@@ -692,7 +768,8 @@ class Tribute(Particle):
         self.wep_can_craft = craftable_weapon
         return prob_craft * can_craft * 100
 
-    # Craft the weapon based on your skill. If you fail to craft, you still lose the items. Wah-wah.
+    # Craft the weapon based on your skill. If you fail to craft, you still
+    # lose the items. Wah-wah.
     def do_craft_weapon(self, wep_to_craft):
         items_used = self.weapon_info.totalItemsToCraft(wep_to_craft)
         for needed in items_used:
@@ -702,7 +779,7 @@ class Tribute(Particle):
         chance = random.randint(1, 10)
         if chance <= self.attributes['crafting_skill']:
             crafted = True
-            self.weapon = weapon(wep_to_craft)
+            self.weapon = Weapon(wep_to_craft)
         else:
             crafted = False
 
