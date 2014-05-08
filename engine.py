@@ -109,12 +109,12 @@ class GameEngine(object):
                 if event.key == K_q:
                     me.PAUSED = not me.PAUSED
                 if event.key == K_f:
-                    me.curTrib.goals[0].modify_value(-10)
+                    me.curTrib.goals['hunger'].modify_value(-10)
                 if event.key == K_d:
-                    me.curTrib.goals[1].modify_value(-10)
+                    me.curTrib.goals['thirst'].modify_value(-10)
                 if event.key == K_w:
-                    me.curTrib.getWeapon()
-                    me.curTrib.goals[5].modify_value(-10)
+                    me.curTrib.get_weapon()
+                    me.curTrib.goals['get_weapon'].modify_value(-10)
 
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -136,8 +136,6 @@ class GameEngine(object):
                             namePos += 1
 
         if not me.PAUSED:
-            #for tribute in me.tributes:
-                #me.gameMap[tribute.old_state[0]][tribute.old_state[1]].tribute = None
             for x in range(50):
                 for y in range(50):
                     me.gameMap[x][y].tribute = None
@@ -148,7 +146,7 @@ class GameEngine(object):
             for tribute in me.tributes:
                 tribute.act(me.gameMap, me.state)  # finds bestAction and does it.
                 tribute.end_turn()
-                death = tribute.checkDead()
+                death = tribute.check_dead()
                 if death is not None:
                     print tribute.first_name, " ", tribute.last_name, " death by ", death
                     me.tributes.remove(tribute)
@@ -159,8 +157,8 @@ class GameEngine(object):
             me.view.render(me.state, me.curTrib, me.tributes_by_district, me.tributes, 0)
             me.state.update()
         else:
-            if len(me.tributes)==1:
-                 me.view.render(me.state, me.curTrib, me.tributes_by_district, me.tributes, 1)
+            if len(me.tributes) == 1:
+                me.view.render(me.state, me.curTrib, me.tributes_by_district, me.tributes, 1)
             else:
                 me.view.render(me.state, me.curTrib, me.tributes_by_district, me.tributes, 0)
         return True
@@ -269,7 +267,7 @@ class GameEngine(object):
         allyStats = tribute.attributes['friendliness'] - tribute.attributes['bloodlust']
 
 
-        kill = Goal("kill", killStats)
+        kill = Goal("kill", killStats, 100)
         hide = Goal("hide", hideStats)
         getweapon = Goal("getweapon", getWeaponStats)
         ally = Goal("ally", allyStats)

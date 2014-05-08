@@ -59,6 +59,7 @@ class Tribute(Particle):
         self.visited_set = set()
         self.explore_point_index = 0
         self.explore_point = NAVIGATION_POINTS[self.explore_point_index]
+        self.killed_by = None
 
         self.hidden = False
 
@@ -206,10 +207,10 @@ class Tribute(Particle):
         self.goals['fear'].modify_value(damage * 10)
         if self.stats['health'] <= 0:
             self.killed = True
-            self.killedBy = self.opponent
+            self.killed_by = self.opponent
             if engine.GameEngine.FIGHT_MESSAGES:
-                print str(self) + ' was killed by ' + str(self.killedBy)
-            self.disengage_in_combat((self.opponent or self.killedBy or self.last_opponent))
+                print str(self) + ' was killed by ' + str(self.killed_by)
+            self.disengage_in_combat((self.opponent or self.killed_by or self.last_opponent))
 
     #Need to figure out exactly how far
     #/ how we want to handle depth in this function
@@ -227,7 +228,7 @@ class Tribute(Particle):
 
         return min_val
 
-    def decide_fight_move(self, game_map):
+    def decide_fight_move(self):
         if self.goals['fear'].value < random.randrange(105, 150):
             actions = ['attack_head', 'attack_chest', 'attack_gut', 'attack_legs']
             return random.choice(actions)
@@ -257,6 +258,7 @@ class Tribute(Particle):
 
             neighbors = mapReader.get_neighbors2(gameMap, self.state)
             forbidden_states = []
+
             for trib in engine.GameEngine.tributes:
                 if trib.state in neighbors and trib.id != self.id:
                     forbidden_states.append(trib.state)
@@ -274,7 +276,7 @@ class Tribute(Particle):
             self.do_action(best_action[0], gameMap)
 
         elif self.fighting_state == FIGHT_STATE['fighting']:
-            best_action = self.decide_fight_move(gameMap)
+            best_action = self.decide_fight_move()
             self.do_fight_action(best_action)
 
     def do_fight_action(self, action_name):
@@ -309,6 +311,9 @@ class Tribute(Particle):
 
         if self.attributes['fighting_skill'] > 7:
             chance_mult += 0.15
+        if engine.GameEngine.FIGHT_MESSAGES:
+            if self.has_weapon:
+                print str(self), ' swings his/her ', self.weapon.type
 
         if action_name == 'attack_head':
             if draw < 0.5 * chance_mult:
@@ -332,15 +337,6 @@ class Tribute(Particle):
             self.fighting_state = FIGHT_STATE['fleeing']
 
     def do_action(self, action, game_map):
-
-        ##IF you can Craft a weapon, do it
-        ##if(not self.has_weapon):
-        ##    for weapon in self.weaponInfo.weaponList:
-        ##        if self.weaponInfo.canCraft(weapon, self.craftPouch):
-        ##            action.index = 7
-         ##           self.wepCanCraft = weapon
-
-
         self.hidden = False
 
         self.last_action = action
@@ -366,17 +362,17 @@ class Tribute(Particle):
             goal = self.goals['get_weapon']
             if wep_prob > 0.9:
                 if rand <= wep_prob:
-                    self.getWeapon()
+                    self.get_weapon()
                     goal.modify_value(-action.values[0])
             else:
-                #doCraftScavenge will return zero if you fail to find something, and one if you succeed
+                # doCraftScavenge will return zero if you fail to find something, and one if you succeed
                 num = self.checkCraftScavenge(game_map)
                 goal.modify_value(-self.bestScavPoints * self.doCraftScavenge(game_map, self.bestScavChoice))
         elif action.index == 7:  # craft
-            ##Crafting Probability is factored into doCraftWeapon
+            # Crafting Probability is factored into doCraftWeapon
             self.checkCraftWeapon()
             if self.wepCanCraft != '':
-                ## Returns boolean if you did it or not
+                # Returns boolean if you did it or not
                 crafted = self.doCraftWeapon(game_map, self.wepCanCraft)
                 if crafted:
                     self.goals['get_weapon'].value = 0
@@ -455,7 +451,7 @@ class Tribute(Particle):
 
             self.goals['ally'].modify_value(0.05 / (len(self.allies) + 1)**2)
 
-        self.goals['hunger'].modify_value((1.0 / self.attributes['endurance']) + (self.attributes['size'] / 5.0))
+        self.goals['hunger'].modify_value(1.0 / self.attributes['endurance'] + self.attributes['size'] / 5.0)
 
         self.goals['thirst'].modify_value(1.0 / self.attributes['endurance'])
 
@@ -556,12 +552,10 @@ class Tribute(Particle):
                 val += goal.value * goal.value
         return val
 
-    def checkDead(self):
-
+    def check_dead(self):
         if self.goals['hunger'].value >= 200:
             self.killed = True
             return " starvation "
-            #You get thirsty a lot faster than you get hungry
 
         if self.goals['thirst'].value >= 200:
             self.killed = True
@@ -572,11 +566,11 @@ class Tribute(Particle):
             return " exhaustion "
 
         if self.killed:
-            return self.killedBy
+            return self.killed_by
         else:
             return None
 
-    def getWeapon(self):
+    def get_weapon(self):
         self.has_weapon = True
         weaponType = random.randint(1, 10)
         self.weapon = weapon(self.weaponInfo.weaponType(weaponType))

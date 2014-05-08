@@ -9,5 +9,5 @@
     "talk_ally": 5,
     "explore": [3, 3, 4],
 
-    "fight_messages": false
+    "fight_messages": true
 }
